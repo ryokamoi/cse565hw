@@ -6,14 +6,13 @@
 
 using namespace std;
 
+vector<long long> color_list;
+vector<long long> ordered_vertices;
 
-vector<int> color_list;
-vector<int> ordered_vertices;
-
-void explore(const unordered_map<int, vector<int>>& graph, int v, int color) {
+void explore(const unordered_map<long long, vector<long long>>& graph, long long v, long long color) {
     color_list[v] = color;
     
-    for (int edge : graph.at(v)) {
+    for (long long edge : graph.at(v)) {
         if (color_list[edge] == -1) {
             explore(graph, edge, color);
         }
@@ -22,10 +21,9 @@ void explore(const unordered_map<int, vector<int>>& graph, int v, int color) {
     ordered_vertices.push_back(v);
 }
 
-
-void dfs(const unordered_map<int, vector<int>>& graph, const vector<int>& vertices) {
-    int color = 1;
-    for (int v : vertices) {
+void dfs(const unordered_map<long long, vector<long long>>& graph, const vector<long long>& vertices) {
+    long long color = 1;
+    for (long long v : vertices) {
         if (color_list[v] == -1) {
             explore(graph, v, color);
             color++;
@@ -36,34 +34,34 @@ void dfs(const unordered_map<int, vector<int>>& graph, const vector<int>& vertic
 
 int main() {
     // Load inputs
-    int num_junction;
+    long long num_junction;
     cin >> num_junction;
 
-    vector<int> junctions_cost(num_junction);
-    for (int i = 0; i < num_junction; ++i) {
+    vector<long long> junctions_cost(num_junction);
+    for (long long i = 0; i < num_junction; ++i) {
         cin >> junctions_cost[i];
     }
 
-    int road_num;
+    long long road_num;
     cin >> road_num;
-    vector<pair<int, int>> roads_list(road_num);
+    vector<pair<long long, long long>> roads_list(road_num);
 
-    for (int i = 0; i < road_num; ++i) {
-        int e_from, e_to;
+    for (long long i = 0; i < road_num; ++i) {
+        long long e_from, e_to;
         cin >> e_from >> e_to;
         roads_list[i] = {e_from - 1, e_to - 1};
     }
 
     // Construct the graph (adjacency list)
-    unordered_map<int, vector<int>> graph, inverse_graph;
-    for (int jnc = 0; jnc < num_junction; ++jnc) {
+    unordered_map<long long, vector<long long>> graph, inverse_graph;
+    for (long long jnc = 0; jnc < num_junction; ++jnc) {
         graph[jnc] = {};
         inverse_graph[jnc] = {};
     }
 
-    for (int i = 0; i < road_num; ++i) {
-        int e_from = roads_list[i].first;
-        int e_to = roads_list[i].second;
+    for (long long i = 0; i < road_num; ++i) {
+        long long e_from = roads_list[i].first;
+        long long e_to = roads_list[i].second;
         graph[e_from].push_back(e_to);
         inverse_graph[e_to].push_back(e_from);
     }
@@ -73,38 +71,44 @@ int main() {
     ordered_vertices.clear();
 
     // DFS on inverse graph
-    vector<int> vertices(num_junction);
-    for (int i = 0; i < num_junction; ++i) {
+    vector<long long> vertices(num_junction);
+    for (long long i = 0; i < num_junction; ++i) {
         vertices[i] = i;
     }
     dfs(inverse_graph, vertices);
 
-    // copy reversed ordered vertices
-    vector<int> reversed_ordered_vertices(num_junction);
-    for (int i = 0; i < num_junction; ++i) {
-        reversed_ordered_vertices[i] = ordered_vertices[num_junction - 1 - i];
-    }
+    // Reverse the ordered vertices
+    reverse(ordered_vertices.begin(), ordered_vertices.end());
 
     // DFS on original graph with the ordered vertices from the inverse graph
     color_list.assign(num_junction, -1);
-    dfs(graph, reversed_ordered_vertices);
+    dfs(graph, ordered_vertices);
 
     // Calculate the price and number of combinations
     long long price = 0;
     long long combinations = 1;
-    const int MOD = 1000000007;
+    const long long MOD = 1000000007;
 
-    unordered_map<int, vector<int>> scc_cost_dict;
-    for (int i = 0; i < num_junction; ++i) {
-        scc_cost_dict[color_list[i]].push_back(junctions_cost[i]);
+    unordered_map<long long, pair<long long, long long>> scc_min_cost; // Stores {min_cost, count}
+
+    for (long long i = 0; i < num_junction; ++i) {
+        long long color = color_list[i];
+        long long cost = junctions_cost[i];
+        
+        if (scc_min_cost.find(color) == scc_min_cost.end()) {
+            scc_min_cost[color] = {cost, 1};
+        } else {
+            if (cost < scc_min_cost[color].first) {
+                scc_min_cost[color] = {cost, 1};
+            } else if (cost == scc_min_cost[color].first) {
+                scc_min_cost[color].second++;
+            }
+        }
     }
 
-    for (int scc = 1; scc <= *max_element(color_list.begin(), color_list.end()); ++scc) {
-        int min_price = *min_element(scc_cost_dict[scc].begin(), scc_cost_dict[scc].end());
-        price += min_price;
-
-        int count_min_price = count(scc_cost_dict[scc].begin(), scc_cost_dict[scc].end(), min_price);
-        combinations = (combinations * count_min_price) % MOD;
+    for (const auto& [color, min_cost_count] : scc_min_cost) {
+        price += min_cost_count.first;
+        combinations = (combinations * min_cost_count.second) % MOD;
     }
 
     // Output result
