@@ -23,18 +23,35 @@ for i in range(road_num):
     inverse_graph[v_to].append(v_from)
 
 
-def explore(graph, v, color, ordered_vertices: list[int], color_list: list):
-    color_list[v] = color
+def explore(graph, v, color, ordered_vertices: list[int], color_list: list[int]):
+    # color_list[v] = color
     
-    for to_v in graph[v]:
-        if color_list[to_v] is None:
-            ordered_vertices, color_list = explore(graph, to_v, color, ordered_vertices, color_list)
+    # for to_v in graph[v]:
+    #     if color_list[to_v] is None:
+    #         ordered_vertices, color_list = explore(graph, to_v, color, ordered_vertices, color_list)
     
-    ordered_vertices.append(v)
+    # ordered_vertices.append(v)
+    
+    stack = [v]
+    while stack:
+        node = stack[-1]
+        if color_list[node] is None:
+            color_list[node] = color
+            all_visited = True
+            
+            for to_v in graph[node]:
+                if color_list[to_v] is None:
+                    stack.append(to_v)
+                    all_visited = False
+            if all_visited:
+                ordered_vertices.append(stack.pop())
+        else:
+            ordered_vertices.append(stack.pop())
+    
     return ordered_vertices, color_list
 
 
-def dfs(graph: dict[int, list[int]], vertices: List[int], color_list: list):
+def dfs(graph: dict[int, list[int]], vertices: List[int], color_list: list[int]):
     ordered_vertices = []
     color = 1
     for v in vertices:
