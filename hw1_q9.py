@@ -41,7 +41,7 @@ def dfs(graph: dict[int, list[int]], vertices: List[int]):
 
 
 # We need to make a police checkpoint in each SCC
-# SCC algorithm
+# create inverse graph to get order of vertices
 inverse_graph: dict[int, list[int]] = {}
 for v in range(num_junction):
     inverse_graph[v] = []
@@ -54,19 +54,22 @@ color_list = [None for _ in range(num_junction)]
 ordered_vertices = []
 dfs(inverse_graph, list(range(num_junction)))
 
+# SCC algorithm
 color_list = [None for _ in range(num_junction)]
 dfs(graph, ordered_vertices)
 
 price = 0
 combinations = 1
+
+scc_cost_dict: dict[str, list] = {}
+for color, cost in zip(color_list, junctions_cost):
+    scc_cost_dict.setdefault(color, []).append(cost)
+
 for scc in range(1, max(color_list)+1):
-    prices_list = [junctions_cost[v] for v in range(num_junction) if color_list[v] == scc]
-    min_price = min(prices_list)
-    
+    min_price = min(scc_cost_dict[scc])
     price += min_price
-    price %= 1000000007
     
-    combinations *= prices_list.count(min_price)
+    combinations *= scc_cost_dict[scc].count(min_price)
     combinations %= 1000000007
 
 print(price, combinations)
