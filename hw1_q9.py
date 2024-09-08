@@ -24,14 +24,7 @@ for i in range(road_num):
 
 
 def explore(graph, v, color, ordered_vertices: list[int], color_list: list[int]):
-    # color_list[v] = color
-    
-    # for to_v in graph[v]:
-    #     if color_list[to_v] is None:
-    #         ordered_vertices, color_list = explore(graph, to_v, color, ordered_vertices, color_list)
-    
-    # ordered_vertices.append(v)
-    
+    added_set: set = set()
     stack = [v]
     while stack:
         node = stack[-1]
@@ -45,8 +38,12 @@ def explore(graph, v, color, ordered_vertices: list[int], color_list: list[int])
                     all_visited = False
             if all_visited:
                 ordered_vertices.append(stack.pop())
+                added_set.add(node)
         else:
-            ordered_vertices.append(stack.pop())
+            stack.pop()
+            if node not in added_set:
+                ordered_vertices.append(node)
+                added_set.add(node)
     
     return ordered_vertices, color_list
 
@@ -71,6 +68,7 @@ order, _ = dfs(inverse_graph, list(range(num_junction)), color_list)
 color_list = [None for _ in range(num_junction)]
 _, color_list = dfs(graph, order, color_list)
 
+# find the minimum cost for each SCC
 price = 0
 combinations = 1
 
