@@ -23,39 +23,36 @@ for i in range(road_num):
     inverse_graph[v_to].append(v_from)
 
 
-def explore(graph, v, color, ordered_vertices: list[int]):
-    global color_list
+def explore(graph, v, color, ordered_vertices: list[int], color_list: list):
     color_list[v] = color
     
     for to_v in graph[v]:
         if color_list[to_v] is None:
-            ordered_vertices = explore(graph, to_v, color, ordered_vertices)
+            ordered_vertices, color_list = explore(graph, to_v, color, ordered_vertices, color_list)
     
     ordered_vertices.append(v)
-    return ordered_vertices
+    return ordered_vertices, color_list
 
 
-def dfs(graph: dict[int, list[int]], vertices: List[int]):
+def dfs(graph: dict[int, list[int]], vertices: List[int], color_list: list):
     ordered_vertices = []
-    
-    global color_list
-    color: int = 1
+    color = 1
     for v in vertices:
         if color_list[v] is None:
-            ordered_vertices = explore(graph, v, color, ordered_vertices)
+            ordered_vertices, color_list = explore(graph, v, color, ordered_vertices, color_list)
             color += 1
     
-    return ordered_vertices[::-1]
+    return ordered_vertices[::-1], color_list
 
 
 # We need to make a police checkpoint in each SCC
 # create inverse graph to get order of vertices
 color_list = [None for _ in range(num_junction)]
-order = dfs(inverse_graph, list(range(num_junction)))
+order, _ = dfs(inverse_graph, list(range(num_junction)), color_list)
 
 # SCC algorithm
 color_list = [None for _ in range(num_junction)]
-_ = dfs(graph, order)
+_, color_list = dfs(graph, order, color_list)
 
 price = 0
 combinations = 1
