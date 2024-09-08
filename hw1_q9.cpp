@@ -19,7 +19,7 @@ void explore(const unordered_map<int, vector<int>>& graph, int v, int color) {
         }
     }
 
-    ordered_vertices.insert(ordered_vertices.begin(), v);
+    ordered_vertices.push_back(v);
 }
 
 
@@ -79,12 +79,15 @@ int main() {
     }
     dfs(inverse_graph, vertices);
 
-    // copy ordered vertices
-    vector<int> ordered_vertices_copy = ordered_vertices;
+    // copy reversed ordered vertices
+    vector<int> reversed_ordered_vertices(num_junction);
+    for (int i = 0; i < num_junction; ++i) {
+        reversed_ordered_vertices[i] = ordered_vertices[num_junction - 1 - i];
+    }
 
     // DFS on original graph with the ordered vertices from the inverse graph
     color_list.assign(num_junction, -1);
-    dfs(graph, ordered_vertices_copy);
+    dfs(graph, reversed_ordered_vertices);
 
     // Calculate the price and number of combinations
     long long price = 0;
