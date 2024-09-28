@@ -1,17 +1,20 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <cstdio>
 
 using namespace std;
 
 int main() {
     int t;
-    cin >> t;
+    // cin >> t;
+    scanf("%d", &t);
 
     vector<pair<int, int>> problems;
     for (int i = 0; i < t; i++) {
         int a, b;
-        cin >> a >> b;
+        // cin >> a >> b;
+        scanf("%d %d", &a, &b);
         problems.push_back({a, b});
     }
 
@@ -60,7 +63,8 @@ int main() {
     for (const auto& problem : problems) {
         int a = problem.first;
         int b = problem.second;
-        cout << sum_of_prime_factors[a] - sum_of_prime_factors[b] << endl;
+        // cout << sum_of_prime_factors[a] - sum_of_prime_factors[b] << endl;
+        printf("%d\n", sum_of_prime_factors[a] - sum_of_prime_factors[b]);
     }
 
     return 0;
