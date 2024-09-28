@@ -45,18 +45,24 @@ def char_to_int(c):
 
 # DP over the topological order
 
+# DP over the topological order
+dp = [[0 for _ in range(26)] for _ in range(n+1)]
+ 
 # print(graph)
 # print(sorted_vertices)
-ans = 0
-for c in range(26):
-    dp = [0 for _ in range(n+1)]
-    for v in sorted_vertices:
+for v in sorted_vertices:
+    for c in range(26):
         for neighbor in inverse_graph[v]:
-            dp[v] = max(dp[v], dp[neighbor])
+            dp[v][c] = max(dp[v][c], dp[neighbor][c])
+ 
+    c = char_to_int(node_char[v])
+    dp[v][c] += 1
+ 
+# for r in dp:
+#     print(r)
 
-        if c == char_to_int(node_char[v]):
-            dp[v] += 1
-    
-    ans = max(ans, max(dp))
-
+ans = 0
+for r in dp:
+    ans = max(ans, max(r))
+ 
 print(ans)
